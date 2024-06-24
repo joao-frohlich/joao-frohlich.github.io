@@ -30,6 +30,13 @@ github_username:  joao-frohlich
 theme: minima
 plugins:
   - jekyll-feed
+  - jekyll-multiple-languages-plugin
+
+
+# Language settings
+languages: ["en", "br"]
+
+exclude_from_localizations: ["javascript", "images", "css", "scripts", "favicon.ico"]
 
 # Exclude from processing.
 # The following items will not be processed, by default.
