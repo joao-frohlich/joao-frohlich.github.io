@@ -18,14 +18,27 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: João Vitor Fröhlich
+title:
+  en: João Vitor Fröhlich
+  ptbr: João Vitor Fröhlich
 email: joaovitorfrohlich@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Under construction
+  en: Under construction
+  ptbr: Em construção
+date_formats:
+  en: "%b. %e, %Y"
+  ptbr: "%d/%m/%y"
 baseurl: "/docs" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
 github_username:  joao-frohlich
+
+# Top menu order
+header_pages:
+  en:
+    - about-en.markdown
+  ptbr:
+    - about-ptbr.markdown
 
 # Build settings
 theme: minima
@@ -51,3 +64,10 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+#
+
+# Polyglot language plugin settings
+languages: ["en", "ptbr"]
+default_lang: "en"
+exclude_from_localization: ["assets", "javascript", "images", "css", "public"]
+parallel_localization: true
