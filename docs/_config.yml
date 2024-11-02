@@ -22,9 +22,9 @@ title:
   en: João Vitor Fröhlich
   ptbr: João Vitor Fröhlich
 email: joaovitorfrohlich@gmail.com
-description: >- # this means to ignore newlines until "baseurl:"
-  en: Under construction
-  ptbr: Em construção
+description:
+  en: A personal blog about compilers and other interesting computer science stuff
+  ptbr: Um blog pessoal sobre compiladores e algumas outras coisas interessantes
 date_formats:
   en: "%b. %e, %Y"
   ptbr: "%d/%m/%y"

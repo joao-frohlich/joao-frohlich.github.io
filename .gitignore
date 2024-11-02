@@ -1,1 +1,4 @@
 docs/_site
+deploy.sh
+
+docs/.vscode

@@ -26,15 +26,18 @@ layout: base
       {%- assign date_format = site.date_formats[lang] | default: "%b %-d, %Y" -%}
       {%- for post in posts -%}
       <li>
-        <span class="post-meta">{{ post.date | date: date_format }}</span>
         <h3>
           <a class="post-link" href="{{ post.url | relative_url }}">
             {{ post.title | escape }}
           </a>
         </h3>
-        {%- if site.show_excerpts -%}
+        <p class="post-meta">{{ post.date | date: date_format }}</p>
+
+        {{ post.content | strip_html | truncatewords: 50 }}
+        
+        <!-- {%- if site.show_excerpts -%}
           {{ post.excerpt }}
-        {%- endif -%}
+        {%- endif -%} -->
       </li>
       {%- endfor -%}
     </ul>
