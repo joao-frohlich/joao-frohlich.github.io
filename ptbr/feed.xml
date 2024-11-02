@@ -1,17 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://joao-frohlich.github.io/ptbr/feed.xml" rel="self" type="application/atom+xml" /><link href="https://joao-frohlich.github.io/ptbr/" rel="alternate" type="text/html" /><updated>2024-11-01T22:49:02-03:00</updated><id>https://joao-frohlich.github.io/feed.xml</id><title type="html">{“en”=&amp;gt;”João Vitor Fröhlich”, “ptbr”=&amp;gt;”João Vitor Fröhlich”}</title><subtitle>en: Under construction ptbr: Em construção</subtitle><entry xml:lang="ptbr"><title type="html">Bem-vindo ao Jekyll!</title><link href="https://joao-frohlich.github.io/ptbr/jekyll/update/2024/11/01/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Bem-vindo ao Jekyll!" /><published>2024-11-01T20:53:10-03:00</published><updated>2024-11-01T20:53:10-03:00</updated><id>https://joao-frohlich.github.io/jekyll/update/2024/11/01/welcome-to-jekyll</id><content type="html" xml:base="https://joao-frohlich.github.io/jekyll/update/2024/11/01/welcome-to-jekyll.html"><![CDATA[<p>You’ll find this post in your <code class="language-plaintext highlighter-rouge">_posts</code> directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run <code class="language-plaintext highlighter-rouge">jekyll serve</code>, which launches a web server and auto-regenerates your site when a file is updated.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://joao-frohlich.github.io/ptbr/feed.xml" rel="self" type="application/atom+xml" /><link href="https://joao-frohlich.github.io/ptbr/" rel="alternate" type="text/html" /><updated>2024-11-02T18:45:24-03:00</updated><id>https://joao-frohlich.github.io/feed.xml</id><title type="html">{“en”=&amp;gt;”João Vitor Fröhlich”, “ptbr”=&amp;gt;”João Vitor Fröhlich”}</title><subtitle>{&quot;en&quot;=&gt;&quot;A personal blog about compilers and other interesting computer science stuff&quot;, &quot;ptbr&quot;=&gt;&quot;Um blog pessoal sobre compiladores e algumas outras coisas interessantes&quot;}</subtitle><entry xml:lang="ptbr"><title type="html">Bem-vindo ao meu blog pessoal!</title><link href="https://joao-frohlich.github.io/ptbr/none/2024/11/02/welcome-to-my-blog.html" rel="alternate" type="text/html" title="Bem-vindo ao meu blog pessoal!" /><published>2024-11-02T18:40:00-03:00</published><updated>2024-11-02T18:40:00-03:00</updated><id>https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog</id><content type="html" xml:base="https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog.html"><![CDATA[<p>(Isso é apenas um ctrl+c ctrl+v do sobre)</p>
 
-<p>Jekyll requires blog post files to be named according to the following format:</p>
+<p>Olá, esse é meu blog pessoal. Nele, eu vou tentar escrever sobre algumas coisas que eu vou aprendendo e achando interessante durante os meus estudos. Como atualmente eu estou trabalhando com compiladores no mestrado, é esperado mais postagens voltadas para essa área, porém eu devo tentar escrever sobre outras coisas que eu acho interessante. Além disso, por ser brasileiro, mas a área ter a maior parte dos conteúdos voltados para inglês, eu vou tentar esse blog como um site bilíngue, com uma versão em inglês e outra em português para cada postagem (e, por via de regra, a versão em português deve estar melhor escrita, porque eu domino muito mais o idioma).</p>
 
-<p><code class="language-plaintext highlighter-rouge">YEAR-MONTH-DAY-title.MARKUP</code></p>
+<p>Sobre mim:</p>
 
-<p>Where <code class="language-plaintext highlighter-rouge">YEAR</code> is a four-digit number, <code class="language-plaintext highlighter-rouge">MONTH</code> and <code class="language-plaintext highlighter-rouge">DAY</code> are both two-digit numbers, and <code class="language-plaintext highlighter-rouge">MARKUP</code> is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
+<ul>
+  <li>24 anos</li>
+  <li>Graduado em ciência da computação pela Universidade do Estado de Santa Catarina (UDESC)</li>
+  <li>Mestrando em ciência da computação na Universidade Federal de Minas Gerais (UFMG), trabalhando no Laboratório de Compiladores (<a href="https://lac-dcc.github.io/">LAC</a>)</li>
+  <li>Programador competitivo aposentado:
+    <ul>
+      <li>2 participações em finais brasileira da Maratona de Programação</li>
+      <li>1 medalha de bronze na XXVII final brasileira</li>
+      <li>2 vezes o melhor do sul na final brasileira</li>
+      <li>Ganhador das duas primeiras maratonas sul brasileiras de programação</li>
+    </ul>
+  </li>
+</ul>
 
-<p>Jekyll also offers powerful support for code snippets:</p>
+<p>Minhas redes sociais (se é que posso chamar de rede social):</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">print_hi</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-  <span class="nb">puts</span> <span class="s2">"Hi, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
-<span class="k">end</span>
-<span class="n">print_hi</span><span class="p">(</span><span class="s1">'Tom'</span><span class="p">)</span>
-<span class="c1">#=&gt; prints 'Hi, Tom' to STDOUT.</span></code></pre></figure>
-
-<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name></name></author><category term="jekyll" /><category term="update" /><summary type="html"><![CDATA[You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.]]></summary></entry></feed>
+<p><a href="https://github.com/joao-frohlich">github</a></p>]]></content><author><name></name></author><category term="none" /><summary type="html"><![CDATA[(Isso é apenas um ctrl+c ctrl+v do sobre)]]></summary></entry></feed>
