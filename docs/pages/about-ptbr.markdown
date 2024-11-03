@@ -9,7 +9,6 @@ Olá, eu me chamo João Vitor Fröhlich esse é meu blog pessoal. Nele, eu vou t
 
 Sobre mim:
 
-- 24 anos
 - Graduado em ciência da computação pela Universidade do Estado de Santa Catarina (UDESC)
 - Mestrando em ciência da computação na Universidade Federal de Minas Gerais (UFMG), trabalhando no Laboratório de Compiladores ([LAC](https://lac-dcc.github.io/))
 - Programador competitivo aposentado:
@@ -20,6 +19,7 @@ Sobre mim:
 
 Minhas redes sociais (se é que posso chamar de rede social):
 
-[github](https://github.com/joao-frohlich)
+- [github](https://github.com/joao-frohlich)
+- email (já tenho minha quantia de spams): eu uso gmail, e antes do @ vai meu nome completo em letras minúsculas (que, por sinal, é o título do site).
 
 Este site é baseado no tema Jekyll [Hyde](https://hyde.getpoole.com/), e a implementação do suporte multilinguístico foi retirada deste [blog de ulricusr](https://www.rueth.info/multilingual-github-pages/)

@@ -2,7 +2,7 @@
 layout: post
 title:  "Bem-vindo ao meu blog pessoal!"
 date:   2024-11-02 18:40 -0300
-categories: none
+category: About
 lang: ptbr
 ---
 (Isso é apenas um ctrl+c ctrl+v do sobre)
@@ -11,7 +11,6 @@ Olá, esse é meu blog pessoal. Nele, eu vou tentar escrever sobre algumas coisa
 
 Sobre mim:
 
-- 24 anos
 - Graduado em ciência da computação pela Universidade do Estado de Santa Catarina (UDESC)
 - Mestrando em ciência da computação na Universidade Federal de Minas Gerais (UFMG), trabalhando no Laboratório de Compiladores ([LAC](https://lac-dcc.github.io/))
 - Programador competitivo aposentado:

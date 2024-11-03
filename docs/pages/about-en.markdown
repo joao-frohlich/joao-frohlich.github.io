@@ -19,7 +19,8 @@ About me:
 
 Where to find me:
 
-[github](https://github.com/joao-frohlich)
+- [github](https://github.com/joao-frohlich)
+- email (I have my quote of spams already): I use gmail, and before the @ goes my full name in lower case (which is the title of this site btw).
 
 This site is based on the [Hyde](https://hyde.getpoole.com/) Jekyll theme, and the implementation of multilingual support is based on this [blog from ulricusr](https://www.rueth.info/multilingual-github-pages/)
 

@@ -36,9 +36,20 @@ github_username:  joao-frohlich
 # Top menu order
 header_pages:
   en:
-    - about-en.markdown
+    - pages/about-en.markdown
+    - pages/publications-en.markdown
+    - pages/categories-en.markdown
   ptbr:
-    - about-ptbr.markdown
+    - pages/about-ptbr.markdown
+    - pages/publications-ptbr.markdown
+    - pages/categories-ptbr.markdown
+
+category_list:
+  en: ["About", "Compilers"]
+  ptbr: ["Sobre", "Compiladores"]
+
+# category_list_en: ["about", "compilers"]
+# category_list_ptbr: ["sobre", "compiladores"]
 
 # Build settings
 theme: minima

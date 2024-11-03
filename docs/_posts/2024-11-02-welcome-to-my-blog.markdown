@@ -2,7 +2,7 @@
 layout: post
 title:  "Welcome to my blog!"
 date:   2024-11-02 18:40:10 -0300
-categories: none
+category: About
 lang: en
 ---
 (This is just a repetition of the about page)
@@ -12,7 +12,6 @@ Hey there, this is my personal blog. Here, I'll try to write something that I'm 
 About me:
 
 - Brazilian
-- 24 y.o.
 - Computer Science undergrad degree at Universidade do Estado de Santa Catarina (UDESC)
 - Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab ([LAC](https://lac-dcc.github.io/))
 - Former competitive programmer:
