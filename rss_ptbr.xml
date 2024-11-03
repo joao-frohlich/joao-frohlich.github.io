@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>João Vitor Fröhlich</title>
+    <description>Um blog pessoal sobre compiladores e algumas outras coisas interessantes</description>
+    <link href="https://joao-frohlich.github.io/rss_ptbr.xml" rel="self"/>
+    <link href="https://joao-frohlich.github.io/"/>
+    <pubDate>02/11/24</pubDate>
+    <lastBuildDate>02/11/24</lastBuildDate>
+    <generator>Jekyll v3.10.0</generator>
+    
+     
+      <item>
+        <title>Welcome to my blog!</title>
+        <description>&lt;p&gt;(This is just a repetition of the about page)&lt;/p&gt;
+
+&lt;p&gt;Hey there, this is my personal blog. Here, I’ll try to write something that I’m learning during my studies. As for now, I’m pursuing a master’s degree researching about compilers, so you might expect some posts about it, but I’ll try to post about some other interesting things on the computer science area. Also, since I’m brazilian, I’ll try to maintain this site as a bilingual site, so every post will have an English and a Brazilian Portuguese version (expect the Portuguese one to be better written than the English one, sorry).&lt;/p&gt;
+
+&lt;p&gt;About me:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Brazilian&lt;/li&gt;
+  &lt;li&gt;24 y.o.&lt;/li&gt;
+  &lt;li&gt;Computer Science undergrad degree at Universidade do Estado de Santa Catarina (UDESC)&lt;/li&gt;
+  &lt;li&gt;Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab (&lt;a href=&quot;https://lac-dcc.github.io/&quot;&gt;LAC&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;Former competitive programmer:
+    &lt;ul&gt;
+      &lt;li&gt;Participated in 2 ICPC Brazilian Finals&lt;/li&gt;
+      &lt;li&gt;Achieved bronze medal at XXVII ICPC Brazilian Finals&lt;/li&gt;
+      &lt;li&gt;2 times best south Brazil team at ICPC Brazilian Finals&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Where to find me:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/joao-frohlich&quot;&gt;github&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>02/11/24</pubDate>
+        <link>https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog.html</link>
+        <guid isPermaLink="true">https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog.html</guid>
+        
+        
+        <category>none</category>
+        
+      </item>
+      
+    
+  </channel>
+</rss>
