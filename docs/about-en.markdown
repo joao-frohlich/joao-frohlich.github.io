@@ -5,12 +5,11 @@ permalink: /about/
 lang: en
 ---
 
-Hey there, this is my personal blog. Here, I'll try to write something that I'm learning during my studies. As for now, I'm pursuing a master's degree researching about compilers, so you might expect some posts about it, but I'll try to post about some other interesting things on the computer science area. Also, since I'm brazilian, I'll try to maintain this site as a bilingual site, so every post will have an English and a Brazilian Portuguese version (expect the Portuguese one to be better written than the English one, sorry).
+Hey there, I'm João Vitor Fröhlich, and this is my personal blog. Here, I'll try to write something that I'm learning during my studies. As for now, I'm pursuing a master's degree researching about compilers, so you might expect some posts about it, but I'll try to post about some other interesting things on the computer science area. Also, since I'm brazilian, I'll try to maintain this site as a bilingual site, so every post will have an English and a Brazilian Portuguese version (expect the Portuguese one to be better written than the English one, sorry).
 
 About me:
 
 - Brazilian
-- 24 y.o.
 - Computer Science undergrad degree at Universidade do Estado de Santa Catarina (UDESC)
 - Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab ([LAC](https://lac-dcc.github.io/))
 - Former competitive programmer:
@@ -21,6 +20,8 @@ About me:
 Where to find me:
 
 [github](https://github.com/joao-frohlich)
+
+This site is based on the [Hyde](https://hyde.getpoole.com/) Jekyll theme, and the implementation of multilingual support is based on this [blog from ulricusr](https://www.rueth.info/multilingual-github-pages/)
 
 <!-- This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
 
