@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    Introduction to Program Static Analysis - Intermediate Representation - 
+    João Vitor Fröhlich
+  </title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Introduction to Program Static Analysis - Intermediate Representation" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Introduction" />
+<meta property="og:description" content="Introduction" />
+<link rel="canonical" href="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:url" content="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:site_name" content="{“en”=&gt;”João Vitor Fröhlich”, “ptbr”=&gt;”João Vitor Fröhlich”}" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-11-03T18:12:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Introduction to Program Static Analysis - Intermediate Representation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-11-03T18:12:00-03:00","datePublished":"2024-11-03T18:12:00-03:00","description":"Introduction","headline":"Introduction to Program Static Analysis - Intermediate Representation","mainEntityOfPage":{"@type":"WebPage","@id":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"},"url":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- <link rel="stylesheet" href="/assets/main.css"> -->
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <!-- <link rel="apple-touch-icon-precomposed" sizes="144x144" href="public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="public/favicon.ico"> -->
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/rss_en.xml"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Introduction to Program Static Analysis - Intermediate Representation" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Introduction" />
+<meta property="og:description" content="Introduction" />
+<link rel="canonical" href="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:url" content="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:site_name" content="{“en”=&gt;”João Vitor Fröhlich”, “ptbr”=&gt;”João Vitor Fröhlich”}" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-11-03T18:12:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Introduction to Program Static Analysis - Intermediate Representation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-11-03T18:12:00-03:00","datePublished":"2024-11-03T18:12:00-03:00","description":"Introduction","headline":"Introduction to Program Static Analysis - Intermediate Representation","mainEntityOfPage":{"@type":"WebPage","@id":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"},"url":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body class="theme-base-0e"><div class="sidebar">
+    <div class="container sidebar-sticky">
+      <div class="sidebar-about">
+        <h2>
+          <a href="/">
+            João Vitor Fröhlich
+          </a>
+        </h2>
+        <p class="lead">A personal blog about compilers and other interesting computer science stuff</p>
+      </div>
+  
+      <nav class="sidebar-nav">
+        <div class="wrapper">
+            
+            
+                
+                <a style="font-weight: bold;" href="/compilers/2024/11/03/intermediate-representation.html" >en</a>
+                
+            
+                |
+                <a  href="/ptbr/compilers/2024/11/03/intermediate-representation.html" >ptbr</a>
+                
+            
+        </div>
+        <!-- <a class="sidebar-nav-item" href="/">Home</a> -->
+  
+        
+  
+        
+        
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/about/">About</a>
+            <!--  -->
+          
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/publications/">Publications</a>
+            <!--  -->
+          
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/categories/">Categories</a>
+            <!--  -->
+          
+        
+  
+        <!-- <a class="sidebar-nav-item" href="/archive/v.zip">Download</a>
+        <a class="sidebar-nav-item" href="">GitHub project</a> -->
+      </nav>
+  
+      <a href="/rss_en.xml" aria-label="rss" > RSS </i> </a>
+
+      <p>&copy; 2024. Some rights reserved.</p>
+    </div>
+  </div>
+  <div class="content container">
+      
+
+<div class="post">
+  <h1 class="post-title">Introduction to Program Static Analysis - Intermediate Representation</h1>
+  <span class="post-date"><time class="dt-published" datetime="2024-11-03T18:12:00-03:00" itemprop="datePublished">
+      Nov.  3, 2024
+    </time>
+  </span>
+  <h3 id="introduction">Introduction</h3>
+
+<p>So, it’s time for a first content post.</p>
+
+<p>For this, since I’ll be talking a lot about compiler optimizations, specially static analysis, I’ve decided to write some posts explaining basic concepts of program static analysis. Then, as a first post to this series, I will try to explain some types of intermediate representation (IR).</p>
+
+<p>I think it’s good to let it clear that I won’t complete this post on a first writing, but rather I’ll be updating this post as I see the need for this. So, every time I write something that needs an IR that I didn’t explained here before, I’ll probably point out that the topic was added here.</p>
+
+<p>Then, let’s start this post talking about two basic IRs: Three Address Code and Control Flow Graph.</p>
+
+<h3 id="three-address-code-tac">Three Address Code (TAC)</h3>
+
+<p>The Three Address Code is an IR where every instruction in the source code is translated into a set of instructions that contains at most three addresses each, which are used for two operands and a result, where the value of the operation is stored (if needed). It might be needless to say, but every instruction in this IR also contains an operator.</p>
+
+<p>Some important things to note about TAC:</p>
+<ul>
+  <li>it makes use of a lot of temporary variables to store values;</li>
+  <li>the instructions are kept ordered, and are intended to be executed one after another, unless there is a branch or jump instruction;</li>
+  <li>it insert labels on the result code to maintain the control flow (i.e. the order the code is intended to be executed). These labels aren’t instructions, just placeholders.</li>
+</ul>
+
+<p>Given this properties, we can define the following operations:</p>
+<ul>
+  <li>Assign: <code class="language-plaintext highlighter-rouge">a = b</code>;</li>
+  <li>Unary operation: <code class="language-plaintext highlighter-rouge">a = op b</code>;</li>
+  <li>Binary operation: <code class="language-plaintext highlighter-rouge">a = b op c</code> or <code class="language-plaintext highlighter-rouge">a = op b c</code>;</li>
+  <li>Branch: <code class="language-plaintext highlighter-rouge">br cmp L1 L2</code>;</li>
+  <li>Jump: <code class="language-plaintext highlighter-rouge">jmp L</code>;</li>
+  <li>Return: <code class="language-plaintext highlighter-rouge">ret a</code>;</li>
+</ul>
+
+<p>Where:</p>
+<ul>
+  <li>a, b, c and cmp are variables (cmp is a boolean variable);</li>
+  <li>op is an operator (+, -, *, /, %…);</li>
+  <li>L, L1 and L2 are labels.</li>
+</ul>
+
+<p>So, suppose the following C code:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>A Three Address Code representation of this would be (in our set of operations defined above):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp L1 L2
+L1:
+    c = 5
+    jmp L3
+L2:
+    c = 3
+L3:
+    r = a + b
+    r = r + c
+    ret r
+</code></pre></div></div>
+
+<h3 id="control-flow-graph-cfg">Control Flow Graph (CFG)</h3>
+
+<p>From the TAC IR, we can derive another intermediate representation which makes it easier to visualize the control flow of our programs. Such IRs are called Control Flow Graphs. Since it is a graph, more specifically a directed graph, it must contain a set of vertices and a set of edges, right? So, who are the vertices and edges in the TAC?</p>
+
+<p>Let’s break down some things here: remember that the TAC keeps the instructions in the order they are meant to be executed, unless there are specific commands to change the order (branches and jumps)? So, to keep it clear, the control flow of a program is the order each command will be executed, so this graph must represent the order in which the program can be executed.</p>
+
+<p>Then, if there is a set of instructions without jumps or branches, we can agree that there is no change in the control flow of the program, right? If that’s the case, we can also agree that we can group then together, and place them in a vertex. Each of these vertices we call a <strong>basic block</strong> of a program, and consist of a list of instructions that don’t change the control flow of a program. The only exception is the last instruction of each basic block. It either terminates the program (a return instruction) or it changes the control flow (a jump or branch instruction).</p>
+
+<p>But, wouldn’t it be easier if we knew what is the first instruction of each basic block rather than the last instruction? Yes, but this is also easy to define, and we have a name for these instructions: <strong>basic block headers</strong>. We can define the basic block headers in our TAC rules in two ways:</p>
+<ul>
+  <li>The first instruction of a program is a basic block header;</li>
+  <li>The instruction right after a label is a basic block header.</li>
+</ul>
+
+<p>So, the vertices are defined, but what about the edges? Well, now that we have the vertices, it’s easy to see what the edges connect. First, note that the basic block that terminates a program don’t have an out edge. As for the other basic blocks, they have branches or jumps to labels, and each of these labels refer to a basic block. Then, there will be an out edge to each label that the last instruction of the basic block goes to.</p>
+
+<p>I would put an image here, but I’m not very used to Jekyll yet, then ASCII art is what I’ve got. Let’s use the last example. I will separate the basic blocks in the TAC and replace the labels to the basic block names, and try to give some visualization of the CFG (that will very probably look terrible on small screens):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-------------- bb0
+a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp bb1 bb2
+--------------
+
+-------------- bb1
+c = 5
+jmp bb3
+--------------
+
+-------------- bb2
+c = 3
+--------------
+
+-------------- bb3
+r = a + b
+r = r + c
+ret r
+--------------
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    bb0
+    / \
+  bb1  bb2
+    \ /
+    bb3
+</code></pre></div></div>
+
+<p>Yeah, that looks worse than I expected. Also, keep in mind that these lines are actually arrows, and go from up to down (in this case). I hope it’s possible to understand the example.</p>
+
+<h3 id="partial-conclusion">(Partial) Conclusion</h3>
+
+<p>So, I think I’ve covered the basic parts of Three Address Code and Control Flow Graphs in this post, and I hope it was understandable. And I really hope to have made it clear, since it’s very important for a lot of things that I want to talk about here, so understanding these aspects is crucial.</p>
+
+<p>I don’t know in what frequency I’ll be posting here, so don’t have any expectations on future posts here. Maybe we’ll see in a next post and, if you want to talk about the post, my email is on the <a href="/about">about</a> page.</p>
+
+<h3 id="references">References</h3>
+
+<p>The main material I used to make this post is from my <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/ementa/">advisor’s lectures on Static Program Analysis</a>.</p>
+
+<p>If you want more material, you can check the <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/biblio.html">bibliography of the same course</a>.</p>
+
+</div>
+
+
+<div class="related">
+  
+    <h2>Related Posts</h2>
+  
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/about/2024/11/02/welcome-to-my-blog.html">
+            Welcome to my blog!
+            <small>02 Nov 2024</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+<!-- <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Introduction to Program Static Analysis - Intermediate Representation</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-11-03T18:12:00-03:00" itemprop="datePublished">
+        Nov.  3, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h3 id="introduction">Introduction</h3>
+
+<p>So, it’s time for a first content post.</p>
+
+<p>For this, since I’ll be talking a lot about compiler optimizations, specially static analysis, I’ve decided to write some posts explaining basic concepts of program static analysis. Then, as a first post to this series, I will try to explain some types of intermediate representation (IR).</p>
+
+<p>I think it’s good to let it clear that I won’t complete this post on a first writing, but rather I’ll be updating this post as I see the need for this. So, every time I write something that needs an IR that I didn’t explained here before, I’ll probably point out that the topic was added here.</p>
+
+<p>Then, let’s start this post talking about two basic IRs: Three Address Code and Control Flow Graph.</p>
+
+<h3 id="three-address-code-tac">Three Address Code (TAC)</h3>
+
+<p>The Three Address Code is an IR where every instruction in the source code is translated into a set of instructions that contains at most three addresses each, which are used for two operands and a result, where the value of the operation is stored (if needed). It might be needless to say, but every instruction in this IR also contains an operator.</p>
+
+<p>Some important things to note about TAC:</p>
+<ul>
+  <li>it makes use of a lot of temporary variables to store values;</li>
+  <li>the instructions are kept ordered, and are intended to be executed one after another, unless there is a branch or jump instruction;</li>
+  <li>it insert labels on the result code to maintain the control flow (i.e. the order the code is intended to be executed). These labels aren’t instructions, just placeholders.</li>
+</ul>
+
+<p>Given this properties, we can define the following operations:</p>
+<ul>
+  <li>Assign: <code class="language-plaintext highlighter-rouge">a = b</code>;</li>
+  <li>Unary operation: <code class="language-plaintext highlighter-rouge">a = op b</code>;</li>
+  <li>Binary operation: <code class="language-plaintext highlighter-rouge">a = b op c</code> or <code class="language-plaintext highlighter-rouge">a = op b c</code>;</li>
+  <li>Branch: <code class="language-plaintext highlighter-rouge">br cmp L1 L2</code>;</li>
+  <li>Jump: <code class="language-plaintext highlighter-rouge">jmp L</code>;</li>
+  <li>Return: <code class="language-plaintext highlighter-rouge">ret a</code>;</li>
+</ul>
+
+<p>Where:</p>
+<ul>
+  <li>a, b, c and cmp are variables (cmp is a boolean variable);</li>
+  <li>op is an operator (+, -, *, /, %…);</li>
+  <li>L, L1 and L2 are labels.</li>
+</ul>
+
+<p>So, suppose the following C code:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>A Three Address Code representation of this would be (in our set of operations defined above):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp L1 L2
+L1:
+    c = 5
+    jmp L3
+L2:
+    c = 3
+L3:
+    r = a + b
+    r = r + c
+    ret r
+</code></pre></div></div>
+
+<h3 id="control-flow-graph-cfg">Control Flow Graph (CFG)</h3>
+
+<p>From the TAC IR, we can derive another intermediate representation which makes it easier to visualize the control flow of our programs. Such IRs are called Control Flow Graphs. Since it is a graph, more specifically a directed graph, it must contain a set of vertices and a set of edges, right? So, who are the vertices and edges in the TAC?</p>
+
+<p>Let’s break down some things here: remember that the TAC keeps the instructions in the order they are meant to be executed, unless there are specific commands to change the order (branches and jumps)? So, to keep it clear, the control flow of a program is the order each command will be executed, so this graph must represent the order in which the program can be executed.</p>
+
+<p>Then, if there is a set of instructions without jumps or branches, we can agree that there is no change in the control flow of the program, right? If that’s the case, we can also agree that we can group then together, and place them in a vertex. Each of these vertices we call a <strong>basic block</strong> of a program, and consist of a list of instructions that don’t change the control flow of a program. The only exception is the last instruction of each basic block. It either terminates the program (a return instruction) or it changes the control flow (a jump or branch instruction).</p>
+
+<p>But, wouldn’t it be easier if we knew what is the first instruction of each basic block rather than the last instruction? Yes, but this is also easy to define, and we have a name for these instructions: <strong>basic block headers</strong>. We can define the basic block headers in our TAC rules in two ways:</p>
+<ul>
+  <li>The first instruction of a program is a basic block header;</li>
+  <li>The instruction right after a label is a basic block header.</li>
+</ul>
+
+<p>So, the vertices are defined, but what about the edges? Well, now that we have the vertices, it’s easy to see what the edges connect. First, note that the basic block that terminates a program don’t have an out edge. As for the other basic blocks, they have branches or jumps to labels, and each of these labels refer to a basic block. Then, there will be an out edge to each label that the last instruction of the basic block goes to.</p>
+
+<p>I would put an image here, but I’m not very used to Jekyll yet, then ASCII art is what I’ve got. Let’s use the last example. I will separate the basic blocks in the TAC and replace the labels to the basic block names, and try to give some visualization of the CFG (that will very probably look terrible on small screens):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-------------- bb0
+a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp bb1 bb2
+--------------
+
+-------------- bb1
+c = 5
+jmp bb3
+--------------
+
+-------------- bb2
+c = 3
+--------------
+
+-------------- bb3
+r = a + b
+r = r + c
+ret r
+--------------
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    bb0
+    / \
+  bb1  bb2
+    \ /
+    bb3
+</code></pre></div></div>
+
+<p>Yeah, that looks worse than I expected. Also, keep in mind that these lines are actually arrows, and go from up to down (in this case). I hope it’s possible to understand the example.</p>
+
+<h3 id="partial-conclusion">(Partial) Conclusion</h3>
+
+<p>So, I think I’ve covered the basic parts of Three Address Code and Control Flow Graphs in this post, and I hope it was understandable. And I really hope to have made it clear, since it’s very important for a lot of things that I want to talk about here, so understanding these aspects is crucial.</p>
+
+<p>I don’t know in what frequency I’ll be posting here, so don’t have any expectations on future posts here. Maybe we’ll see in a next post and, if you want to talk about the post, my email is on the <a href="/about">about</a> page.</p>
+
+<h3 id="references">References</h3>
+
+<p>The main material I used to make this post is from my <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/ementa/">advisor’s lectures on Static Program Analysis</a>.</p>
+
+<p>If you want more material, you can check the <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/biblio.html">bibliography of the same course</a>.</p>
+
+  </div><a class="u-url" href="/compilers/2024/11/03/intermediate-representation.html" hidden></a>
+</article> -->
+
+    </div>
+
+  </body>
+
+</html>

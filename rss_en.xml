@@ -5,9 +5,156 @@
     <description>A personal blog about compilers and other interesting computer science stuff</description>
     <link href="https://joao-frohlich.github.io/rss_en.xml" rel="self"/>
     <link href="https://joao-frohlich.github.io/"/>
-    <pubDate>Nov.  2, 2024</pubDate>
-    <lastBuildDate>Nov.  2, 2024</lastBuildDate>
+    <pubDate>Nov.  3, 2024</pubDate>
+    <lastBuildDate>Nov.  3, 2024</lastBuildDate>
     <generator>Jekyll v3.10.0</generator>
+    
+     
+      <item>
+        <title>Introduction to Program Static Analysis - Intermediate Representation</title>
+        <description>&lt;h3 id=&quot;introduction&quot;&gt;Introduction&lt;/h3&gt;
+
+&lt;p&gt;So, it’s time for a first content post.&lt;/p&gt;
+
+&lt;p&gt;For this, since I’ll be talking a lot about compiler optimizations, specially static analysis, I’ve decided to write some posts explaining basic concepts of program static analysis. Then, as a first post to this series, I will try to explain some types of intermediate representation (IR).&lt;/p&gt;
+
+&lt;p&gt;I think it’s good to let it clear that I won’t complete this post on a first writing, but rather I’ll be updating this post as I see the need for this. So, every time I write something that needs an IR that I didn’t explained here before, I’ll probably point out that the topic was added here.&lt;/p&gt;
+
+&lt;p&gt;Then, let’s start this post talking about two basic IRs: Three Address Code and Control Flow Graph.&lt;/p&gt;
+
+&lt;h3 id=&quot;three-address-code-tac&quot;&gt;Three Address Code (TAC)&lt;/h3&gt;
+
+&lt;p&gt;The Three Address Code is an IR where every instruction in the source code is translated into a set of instructions that contains at most three addresses each, which are used for two operands and a result, where the value of the operation is stored (if needed). It might be needless to say, but every instruction in this IR also contains an operator.&lt;/p&gt;
+
+&lt;p&gt;Some important things to note about TAC:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;it makes use of a lot of temporary variables to store values;&lt;/li&gt;
+  &lt;li&gt;the instructions are kept ordered, and are intended to be executed one after another, unless there is a branch or jump instruction;&lt;/li&gt;
+  &lt;li&gt;it insert labels on the result code to maintain the control flow (i.e. the order the code is intended to be executed). These labels aren’t instructions, just placeholders.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Given this properties, we can define the following operations:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Assign: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a = b&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;Unary operation: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a = op b&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;Binary operation: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a = b op c&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a = op b c&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;Branch: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;br cmp L1 L2&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;Jump: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jmp L&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;Return: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ret a&lt;/code&gt;;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Where:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;a, b, c and cmp are variables (cmp is a boolean variable);&lt;/li&gt;
+  &lt;li&gt;op is an operator (+, -, *, /, %…);&lt;/li&gt;
+  &lt;li&gt;L, L1 and L2 are labels.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So, suppose the following C code:&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;foo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A Three Address Code representation of this would be (in our set of operations defined above):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &amp;lt;= t1
+br cmp L1 L2
+L1:
+    c = 5
+    jmp L3
+L2:
+    c = 3
+L3:
+    r = a + b
+    r = r + c
+    ret r
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;control-flow-graph-cfg&quot;&gt;Control Flow Graph (CFG)&lt;/h3&gt;
+
+&lt;p&gt;From the TAC IR, we can derive another intermediate representation which makes it easier to visualize the control flow of our programs. Such IRs are called Control Flow Graphs. Since it is a graph, more specifically a directed graph, it must contain a set of vertices and a set of edges, right? So, who are the vertices and edges in the TAC?&lt;/p&gt;
+
+&lt;p&gt;Let’s break down some things here: remember that the TAC keeps the instructions in the order they are meant to be executed, unless there are specific commands to change the order (branches and jumps)? So, to keep it clear, the control flow of a program is the order each command will be executed, so this graph must represent the order in which the program can be executed.&lt;/p&gt;
+
+&lt;p&gt;Then, if there is a set of instructions without jumps or branches, we can agree that there is no change in the control flow of the program, right? If that’s the case, we can also agree that we can group then together, and place them in a vertex. Each of these vertices we call a &lt;strong&gt;basic block&lt;/strong&gt; of a program, and consist of a list of instructions that don’t change the control flow of a program. The only exception is the last instruction of each basic block. It either terminates the program (a return instruction) or it changes the control flow (a jump or branch instruction).&lt;/p&gt;
+
+&lt;p&gt;But, wouldn’t it be easier if we knew what is the first instruction of each basic block rather than the last instruction? Yes, but this is also easy to define, and we have a name for these instructions: &lt;strong&gt;basic block headers&lt;/strong&gt;. We can define the basic block headers in our TAC rules in two ways:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;The first instruction of a program is a basic block header;&lt;/li&gt;
+  &lt;li&gt;The instruction right after a label is a basic block header.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So, the vertices are defined, but what about the edges? Well, now that we have the vertices, it’s easy to see what the edges connect. First, note that the basic block that terminates a program don’t have an out edge. As for the other basic blocks, they have branches or jumps to labels, and each of these labels refer to a basic block. Then, there will be an out edge to each label that the last instruction of the basic block goes to.&lt;/p&gt;
+
+&lt;p&gt;I would put an image here, but I’m not very used to Jekyll yet, then ASCII art is what I’ve got. Let’s use the last example. I will separate the basic blocks in the TAC and replace the labels to the basic block names, and try to give some visualization of the CFG (that will very probably look terrible on small screens):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-------------- bb0
+a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &amp;lt;= t1
+br cmp bb1 bb2
+--------------
+
+-------------- bb1
+c = 5
+jmp bb3
+--------------
+
+-------------- bb2
+c = 3
+--------------
+
+-------------- bb3
+r = a + b
+r = r + c
+ret r
+--------------
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    bb0
+    / \
+  bb1  bb2
+    \ /
+    bb3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Yeah, that looks worse than I expected. Also, keep in mind that these lines are actually arrows, and go from up to down (in this case). I hope it’s possible to understand the example.&lt;/p&gt;
+
+&lt;h3 id=&quot;partial-conclusion&quot;&gt;(Partial) Conclusion&lt;/h3&gt;
+
+&lt;p&gt;So, I think I’ve covered the basic parts of Three Address Code and Control Flow Graphs in this post, and I hope it was understandable. And I really hope to have made it clear, since it’s very important for a lot of things that I want to talk about here, so understanding these aspects is crucial.&lt;/p&gt;
+
+&lt;p&gt;I don’t know in what frequency I’ll be posting here, so don’t have any expectations on future posts here. Maybe we’ll see in a next post and, if you want to talk about the post, my email is on the &lt;a href=&quot;/about&quot;&gt;about&lt;/a&gt; page.&lt;/p&gt;
+
+&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
+
+&lt;p&gt;The main material I used to make this post is from my &lt;a href=&quot;https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/ementa/&quot;&gt;advisor’s lectures on Static Program Analysis&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you want more material, you can check the &lt;a href=&quot;https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/biblio.html&quot;&gt;bibliography of the same course&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Nov.  3, 2024</pubDate>
+        <link>https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html</link>
+        <guid isPermaLink="true">https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html</guid>
+        
+        
+        <category>Compilers</category>
+        
+      </item>
+      
     
      
       <item>
@@ -20,7 +167,6 @@
 
 &lt;ul&gt;
   &lt;li&gt;Brazilian&lt;/li&gt;
-  &lt;li&gt;24 y.o.&lt;/li&gt;
   &lt;li&gt;Computer Science undergrad degree at Universidade do Estado de Santa Catarina (UDESC)&lt;/li&gt;
   &lt;li&gt;Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab (&lt;a href=&quot;https://lac-dcc.github.io/&quot;&gt;LAC&lt;/a&gt;)&lt;/li&gt;
   &lt;li&gt;Former competitive programmer:
@@ -37,11 +183,11 @@
 &lt;p&gt;&lt;a href=&quot;https://github.com/joao-frohlich&quot;&gt;github&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Nov.  2, 2024</pubDate>
-        <link>https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog.html</link>
-        <guid isPermaLink="true">https://joao-frohlich.github.io/none/2024/11/02/welcome-to-my-blog.html</guid>
+        <link>https://joao-frohlich.github.io/about/2024/11/02/welcome-to-my-blog.html</link>
+        <guid isPermaLink="true">https://joao-frohlich.github.io/about/2024/11/02/welcome-to-my-blog.html</guid>
         
         
-        <category>none</category>
+        <category>About</category>
         
       </item>
       

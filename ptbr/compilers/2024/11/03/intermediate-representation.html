@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ptbr">
+<head>
+  <meta charset="utf-8">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    Introdução a Análise Estática de Programas - Representação Intermediária - 
+    João Vitor Fröhlich
+  </title><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Introdução a Análise Estática de Programas - Representação Intermediária" />
+<meta property="og:locale" content="ptbr" />
+<meta name="description" content="Introdução" />
+<meta property="og:description" content="Introdução" />
+<link rel="canonical" href="https://joao-frohlich.github.io/ptbr/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:url" content="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:site_name" content="{“en”=&gt;”João Vitor Fröhlich”, “ptbr”=&gt;”João Vitor Fröhlich”}" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-11-03T18:12:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Introdução a Análise Estática de Programas - Representação Intermediária" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-11-03T18:12:00-03:00","datePublished":"2024-11-03T18:12:00-03:00","description":"Introdução","headline":"Introdução a Análise Estática de Programas - Representação Intermediária","mainEntityOfPage":{"@type":"WebPage","@id":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"},"url":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- <link rel="stylesheet" href="/assets/main.css"> -->
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <!-- <link rel="apple-touch-icon-precomposed" sizes="144x144" href="public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="public/favicon.ico"> -->
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/ptbr/rss_ptbr.xml"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Introdução a Análise Estática de Programas - Representação Intermediária" />
+<meta property="og:locale" content="ptbr" />
+<meta name="description" content="Introdução" />
+<meta property="og:description" content="Introdução" />
+<link rel="canonical" href="https://joao-frohlich.github.io/ptbr/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:url" content="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html" />
+<meta property="og:site_name" content="{“en”=&gt;”João Vitor Fröhlich”, “ptbr”=&gt;”João Vitor Fröhlich”}" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-11-03T18:12:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Introdução a Análise Estática de Programas - Representação Intermediária" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-11-03T18:12:00-03:00","datePublished":"2024-11-03T18:12:00-03:00","description":"Introdução","headline":"Introdução a Análise Estática de Programas - Representação Intermediária","mainEntityOfPage":{"@type":"WebPage","@id":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"},"url":"https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body class="theme-base-0e"><div class="sidebar">
+    <div class="container sidebar-sticky">
+      <div class="sidebar-about">
+        <h2>
+          <a href="/ptbr/">
+            João Vitor Fröhlich
+          </a>
+        </h2>
+        <p class="lead">Um blog pessoal sobre compiladores e algumas outras coisas interessantes</p>
+      </div>
+  
+      <nav class="sidebar-nav">
+        <div class="wrapper">
+            
+            
+                
+                <a  href="/compilers/2024/11/03/intermediate-representation.html" >en</a>
+                
+            
+                |
+                <a style="font-weight: bold;" href="/ptbr/compilers/2024/11/03/intermediate-representation.html" >ptbr</a>
+                
+            
+        </div>
+        <!-- <a class="sidebar-nav-item" href="/ptbr/">Home</a> -->
+  
+        
+  
+        
+        
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/ptbr/about/">Sobre</a>
+            <!--  -->
+          
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/ptbr/publications/">Publicações</a>
+            <!--  -->
+          
+        
+            <!--  -->
+            <a class="sidebar-nav-item" href="/ptbr/categories/">Categorias</a>
+            <!--  -->
+          
+        
+  
+        <!-- <a class="sidebar-nav-item" href="/ptbr/archive/v.zip">Download</a>
+        <a class="sidebar-nav-item" href="">GitHub project</a> -->
+      </nav>
+  
+      <a href="/ptbr/rss_ptbr.xml" aria-label="rss" > RSS </i> </a>
+
+      <p>&copy; 2024. Some rights reserved.</p>
+    </div>
+  </div>
+  <div class="content container">
+      
+
+<div class="post">
+  <h1 class="post-title">Introdução a Análise Estática de Programas - Representação Intermediária</h1>
+  <span class="post-date"><time class="dt-published" datetime="2024-11-03T18:12:00-03:00" itemprop="datePublished">
+      03/11/24
+    </time>
+  </span>
+  <h3 id="introdução">Introdução</h3>
+
+<p>Bem, hora de escrever algum conteúdo de fato nesse site.</p>
+
+<p>Eu queria começar falando direto sobre alguma coisa que eu estou trabalhando no mestrado mas, parando pra pensar, eu abordaria conteúdos que algumas pessoas provavelmente nunca sequer ouviram falar, e eu trataria com a naturalidade que eu normalmente trato vendo eles todos os dias no mestrado.</p>
+
+<p>Por isso, decidi iniciar aqui uma série de postagens introdutórias sobre Análise Estática de Programas, que é uma parte muito importante de otimização de compiladores, e que provavelmente eu vou usar muitos conteúdos dessa área em postagens futuras (talvez tudo seja sobre análise estática, mas espero que não).</p>
+
+<p>Como um pontapé inicial dessa série de postagens, eu acho crucial falar de um assunto muito importante, que são as representações intermediárias (RI). De modo geral, uma representação intermediária é uma forma como o código é representado durante as etapas de compilação até que ele vire código de máquina. Normalmente, uma representação intermediária vai ser independente da arquitetura (x86, arm, risc-v, etc…) para a qual o código está sendo compilado, e tais representações permitem visualizar pontos onde um código pode ser otimizado.</p>
+
+<p>Para começar tratando de RI, vou começar falando sobre duas representações muito simples (pelo menos do meu ponto de vista, e eu sou péssimo para julgar a complexidade de algo): Código de Três Endereços (Three Address Code) e Grafo de Fluxo de Controle</p>
+
+<p>Uma pequena observação: eu não vou terminar essa postagem de primeira. Conforme eu for vendo a necessidade, eu vou adicionando novas representações intermediárias aqui e vou apontando nas postagens que usarem esses novos conteúdos.</p>
+
+<h3 id="código-de-três-endereços">Código de Três Endereços</h3>
+
+<p>A RI de Código de Três Endereços (tradução livre feita por mim, não me recordo de ver na literatura alguma tradução para esse termo) é uma representação onde cada instrução do código fonte é traduzida para uma sequência de instruções que possuem, no máximo, três endereços: dois para operandos e um para o resultado, que é onde o valor da operação será armazenado. Vale ressaltar que o código final lembra um pouco um código assembly, e de fato a tradução dessa representação para código de máquina (com muitas ressalvas aqui, porque existe muita otimização feita em cima desse código) passa muito pela adaptação dos operadores para instruções específicas de cada arquitetura.</p>
+
+<p>Algumas coisas importantes sobre essa RI:</p>
+<ul>
+  <li>Ela se utiliza de diversas variáveis temporárias para armazenar valores;</li>
+  <li>As instruções são ordenadas na ordem que elas devem ser executadas, e supostamente deveriam ser executadas uma após a outra, a menos que tenha uma instrução de pulo ou ramificação;</li>
+  <li>Ela insere etiquetas no código para manter a informação do fluxo de controle do programa. Vale ressaltar que essas etiquetas não são comandos executáveis.</li>
+</ul>
+
+<p>Dadas essas propriedades, podemos definir as seguintes operações:</p>
+<ul>
+  <li>Atribuição: <code class="language-plaintext highlighter-rouge">a = b</code></li>
+  <li>Operação unária: <code class="language-plaintext highlighter-rouge">a = op b</code></li>
+  <li>Operação binária: <code class="language-plaintext highlighter-rouge">a = b op c</code> ou <code class="language-plaintext highlighter-rouge">a = op b c</code></li>
+  <li>Ramificação: <code class="language-plaintext highlighter-rouge">br cmp L1 L2</code></li>
+  <li>Pulo: <code class="language-plaintext highlighter-rouge">jmp L</code></li>
+  <li>Retorno: <code class="language-plaintext highlighter-rouge">ret a</code></li>
+</ul>
+
+<p>Onde:</p>
+<ul>
+  <li>a, b, c e cmp são variáveis (cmp é uma variável booleana)</li>
+  <li>op é um operador (+, -, *, /, %, etc…)</li>
+  <li>L, L1 e L2 são etiquetas</li>
+</ul>
+
+<p>Para exemplificar, vamos supor o seguinte código em C:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Dada a definição acima, esse código seria traduzido para o seguinte Código de Três Endereços:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp L1 L2
+L1:
+    c = 5
+    jmp L3
+L2:
+    c = 3
+L3:
+    r = a + b
+    r = r + c
+    ret r
+</code></pre></div></div>
+
+<h3 id="grafo-de-fluxo-de-controle-gfc">Grafo de Fluxo de Controle (GFC)</h3>
+
+<p>Antes de continuar, acho válido definir o que é o fluxo de controle de um programa. Basicamente, o fluxo de controle é a ordem em que as instruções são executadas.</p>
+
+<p>A partir da RI de Código de Três Endereços, nós podemos derivar uma outra representação intermediária que facilita a visualização do fluxo de controle do nosso código. Essa RI é chamada de Grafo de Fluxo de Controle. Portanto, como é um grafo (direcionado, nesse caso), sabemos que ele precisa de um conjunto de vértices e um conjunto de arestas. Portanto, dado um Código de Três Endereços, o que é vértice e o que é aresta nele?</p>
+
+<p>Bom, eu espero que você ainda lembre que o Código de Três Endereços mantém as instruções na ordem que elas devem ser executadas (com exceção de ramificações e pulos). Portanto, se nós temos uma sequência de instruções que não alteram o fluxo de controle do programa (isto é, não fazem pulos para outras partes do código), você concorda que nós podemos agrupar estas instruções em uma estrutura tipo, sei lá, um vértice?</p>
+
+<p>Pois bem, esses vértices num GFC são o que chamamos de <strong>blocos básicos</strong> de um programa. De fato, todas as instruções de um bloco básico não alteram o fluxo de controle do programa, com exceção da última instrução, que pode tanto terminar o programa (ou seja, uma instrução de retorno) ou mudar o fluxo de controle (ou seja, uma instrução de ramificação ou pulo).</p>
+
+<p>Bom, nós definimos qual é a última instrução de um bloco básico, mas não seria mais fácil saber também qual seria a primeira instrução de cada bloco básico? Sim, e de fato, existe até uma denominação para essas instruções: <strong>cabeçalhos de bloco básico</strong> (tradução livre de novo, o termo em inglês é <em>basic block headers</em>). Nas nossas definições de Código de Três Endereços, nós temos duas definições para cabeçalhos de bloco básico:</p>
+<ul>
+  <li>a primeira instrução de um programa é um cabeçalho de um bloco básico;</li>
+  <li>a instrução que sucede uma etiqueta é um cabeçalho de um bloco básico.</li>
+</ul>
+
+<p>Agora que temos o conjunto de vértices do nosso grafo definido, precisamos definir o conjunto de arestas que, lembrando, são direcionadas. Para isso, vamos definir as arestas que saem dos blocos. Ou melhor, começaremos definindo aquelas que não saem, isto porque o bloco básico que termina o programa (cuja última instrução é um retorno) não possuí nenhuma aresta de saída. Para os outros blocos básicos, basta olhar para as etiquetas para onde as últimas instruções apontam, e se lembrar que essas etiquetas indicam quem são os blocos básicos. Então, será criada uma aresta com origem no bloco básico que tem essa instrução de modificação de fluxo de controle e com destino no bloco básico para o qual essa modificação de fluxo é dirigida.</p>
+
+<p>E bem, para exemplificar, eu gostaria muito de usar uma imagem aqui, mas eu não estou muito bem acostumado com o Jekyll ainda, então eu vou usar de um recurso muito simples (mas que fica péssimo em telas pequenas): ASCII art. Puxando do nosso exemplo de Código de Três Endereços, eu vou separar aquele código em blocos básicos e renomear as etiquetas para o nome dos blocos básicos para onde elas apontam:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-------------- bb0
+a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp bb1 bb2
+--------------
+
+-------------- bb1
+c = 5
+jmp bb3
+--------------
+
+-------------- bb2
+c = 3
+--------------
+
+-------------- bb3
+r = a + b
+r = r + c
+ret r
+--------------
+</code></pre></div></div>
+
+<p>Agora, para representar as arestas, vou só usar os nomes. E lembre-se que as arestas têm direção, que nesse caso é de cima para baixo.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    bb0
+    / \
+  bb1  bb2
+    \ /
+    bb3
+</code></pre></div></div>
+
+<p>Ahnn, isso ficou pior do que eu esperava, e eu certamente vou melhorar isso depois, mas espero que o exemplo tenha ficado claro sobre como que GFCs funcionam.</p>
+
+<h3 id="conclusão-parcial">Conclusão (Parcial)</h3>
+
+<p>Acho que eu cobri o básico (e talvez o essencial) de Código de Três Endereços e Grafo de Fluxo de Controle nessa postagem. E de verdade, eu espero que tenha dado para entender, porque esse assunto é muito importante para várias coisas que eu vou escrever aqui.</p>
+
+<p>Não sei com qual frequência que eu vou escrever postagens por aqui, então não crie expectativas de ver novas postagens, afinal o mestrado consome tempo, mas talvez nos veremos em breve. De qualquer forma, se quiser conversar comigo sobre o que eu escrevi aqui… bem, meu email tá no <a href="/ptbr/about">sobre</a>.</p>
+
+<h3 id="referências">Referências</h3>
+
+<p>Para escrever essa postagem, eu usei como material principal as <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/ementa/">aulas do meu orientador sobre Análise Estática de Programas</a>.</p>
+
+<p>Se você quiser mais materiais sobre o assunto, recomendo a página da <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/biblio.html">bibliografia do mesmo curso</a>.</p>
+
+</div>
+
+
+<div class="related">
+  
+    <h2>Postagens relacionadas</h2>
+  
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/ptbr/about/2024/11/02/welcome-to-my-blog.html">
+            Bem-vindo ao meu blog pessoal!
+            <small>02 Nov 2024</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+<!-- <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Introdução a Análise Estática de Programas - Representação Intermediária</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2024-11-03T18:12:00-03:00" itemprop="datePublished">
+        03/11/24
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h3 id="introdução">Introdução</h3>
+
+<p>Bem, hora de escrever algum conteúdo de fato nesse site.</p>
+
+<p>Eu queria começar falando direto sobre alguma coisa que eu estou trabalhando no mestrado mas, parando pra pensar, eu abordaria conteúdos que algumas pessoas provavelmente nunca sequer ouviram falar, e eu trataria com a naturalidade que eu normalmente trato vendo eles todos os dias no mestrado.</p>
+
+<p>Por isso, decidi iniciar aqui uma série de postagens introdutórias sobre Análise Estática de Programas, que é uma parte muito importante de otimização de compiladores, e que provavelmente eu vou usar muitos conteúdos dessa área em postagens futuras (talvez tudo seja sobre análise estática, mas espero que não).</p>
+
+<p>Como um pontapé inicial dessa série de postagens, eu acho crucial falar de um assunto muito importante, que são as representações intermediárias (RI). De modo geral, uma representação intermediária é uma forma como o código é representado durante as etapas de compilação até que ele vire código de máquina. Normalmente, uma representação intermediária vai ser independente da arquitetura (x86, arm, risc-v, etc…) para a qual o código está sendo compilado, e tais representações permitem visualizar pontos onde um código pode ser otimizado.</p>
+
+<p>Para começar tratando de RI, vou começar falando sobre duas representações muito simples (pelo menos do meu ponto de vista, e eu sou péssimo para julgar a complexidade de algo): Código de Três Endereços (Three Address Code) e Grafo de Fluxo de Controle</p>
+
+<p>Uma pequena observação: eu não vou terminar essa postagem de primeira. Conforme eu for vendo a necessidade, eu vou adicionando novas representações intermediárias aqui e vou apontando nas postagens que usarem esses novos conteúdos.</p>
+
+<h3 id="código-de-três-endereços">Código de Três Endereços</h3>
+
+<p>A RI de Código de Três Endereços (tradução livre feita por mim, não me recordo de ver na literatura alguma tradução para esse termo) é uma representação onde cada instrução do código fonte é traduzida para uma sequência de instruções que possuem, no máximo, três endereços: dois para operandos e um para o resultado, que é onde o valor da operação será armazenado. Vale ressaltar que o código final lembra um pouco um código assembly, e de fato a tradução dessa representação para código de máquina (com muitas ressalvas aqui, porque existe muita otimização feita em cima desse código) passa muito pela adaptação dos operadores para instruções específicas de cada arquitetura.</p>
+
+<p>Algumas coisas importantes sobre essa RI:</p>
+<ul>
+  <li>Ela se utiliza de diversas variáveis temporárias para armazenar valores;</li>
+  <li>As instruções são ordenadas na ordem que elas devem ser executadas, e supostamente deveriam ser executadas uma após a outra, a menos que tenha uma instrução de pulo ou ramificação;</li>
+  <li>Ela insere etiquetas no código para manter a informação do fluxo de controle do programa. Vale ressaltar que essas etiquetas não são comandos executáveis.</li>
+</ul>
+
+<p>Dadas essas propriedades, podemos definir as seguintes operações:</p>
+<ul>
+  <li>Atribuição: <code class="language-plaintext highlighter-rouge">a = b</code></li>
+  <li>Operação unária: <code class="language-plaintext highlighter-rouge">a = op b</code></li>
+  <li>Operação binária: <code class="language-plaintext highlighter-rouge">a = b op c</code> ou <code class="language-plaintext highlighter-rouge">a = op b c</code></li>
+  <li>Ramificação: <code class="language-plaintext highlighter-rouge">br cmp L1 L2</code></li>
+  <li>Pulo: <code class="language-plaintext highlighter-rouge">jmp L</code></li>
+  <li>Retorno: <code class="language-plaintext highlighter-rouge">ret a</code></li>
+</ul>
+
+<p>Onde:</p>
+<ul>
+  <li>a, b, c e cmp são variáveis (cmp é uma variável booleana)</li>
+  <li>op é um operador (+, -, *, /, %, etc…)</li>
+  <li>L, L1 e L2 são etiquetas</li>
+</ul>
+
+<p>Para exemplificar, vamos supor o seguinte código em C:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Dada a definição acima, esse código seria traduzido para o seguinte Código de Três Endereços:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp L1 L2
+L1:
+    c = 5
+    jmp L3
+L2:
+    c = 3
+L3:
+    r = a + b
+    r = r + c
+    ret r
+</code></pre></div></div>
+
+<h3 id="grafo-de-fluxo-de-controle-gfc">Grafo de Fluxo de Controle (GFC)</h3>
+
+<p>Antes de continuar, acho válido definir o que é o fluxo de controle de um programa. Basicamente, o fluxo de controle é a ordem em que as instruções são executadas.</p>
+
+<p>A partir da RI de Código de Três Endereços, nós podemos derivar uma outra representação intermediária que facilita a visualização do fluxo de controle do nosso código. Essa RI é chamada de Grafo de Fluxo de Controle. Portanto, como é um grafo (direcionado, nesse caso), sabemos que ele precisa de um conjunto de vértices e um conjunto de arestas. Portanto, dado um Código de Três Endereços, o que é vértice e o que é aresta nele?</p>
+
+<p>Bom, eu espero que você ainda lembre que o Código de Três Endereços mantém as instruções na ordem que elas devem ser executadas (com exceção de ramificações e pulos). Portanto, se nós temos uma sequência de instruções que não alteram o fluxo de controle do programa (isto é, não fazem pulos para outras partes do código), você concorda que nós podemos agrupar estas instruções em uma estrutura tipo, sei lá, um vértice?</p>
+
+<p>Pois bem, esses vértices num GFC são o que chamamos de <strong>blocos básicos</strong> de um programa. De fato, todas as instruções de um bloco básico não alteram o fluxo de controle do programa, com exceção da última instrução, que pode tanto terminar o programa (ou seja, uma instrução de retorno) ou mudar o fluxo de controle (ou seja, uma instrução de ramificação ou pulo).</p>
+
+<p>Bom, nós definimos qual é a última instrução de um bloco básico, mas não seria mais fácil saber também qual seria a primeira instrução de cada bloco básico? Sim, e de fato, existe até uma denominação para essas instruções: <strong>cabeçalhos de bloco básico</strong> (tradução livre de novo, o termo em inglês é <em>basic block headers</em>). Nas nossas definições de Código de Três Endereços, nós temos duas definições para cabeçalhos de bloco básico:</p>
+<ul>
+  <li>a primeira instrução de um programa é um cabeçalho de um bloco básico;</li>
+  <li>a instrução que sucede uma etiqueta é um cabeçalho de um bloco básico.</li>
+</ul>
+
+<p>Agora que temos o conjunto de vértices do nosso grafo definido, precisamos definir o conjunto de arestas que, lembrando, são direcionadas. Para isso, vamos definir as arestas que saem dos blocos. Ou melhor, começaremos definindo aquelas que não saem, isto porque o bloco básico que termina o programa (cuja última instrução é um retorno) não possuí nenhuma aresta de saída. Para os outros blocos básicos, basta olhar para as etiquetas para onde as últimas instruções apontam, e se lembrar que essas etiquetas indicam quem são os blocos básicos. Então, será criada uma aresta com origem no bloco básico que tem essa instrução de modificação de fluxo de controle e com destino no bloco básico para o qual essa modificação de fluxo é dirigida.</p>
+
+<p>E bem, para exemplificar, eu gostaria muito de usar uma imagem aqui, mas eu não estou muito bem acostumado com o Jekyll ainda, então eu vou usar de um recurso muito simples (mas que fica péssimo em telas pequenas): ASCII art. Puxando do nosso exemplo de Código de Três Endereços, eu vou separar aquele código em blocos básicos e renomear as etiquetas para o nome dos blocos básicos para onde elas apontam:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-------------- bb0
+a = 2
+b = a * 2
+t1 = a * 3
+cmp = b &lt;= t1
+br cmp bb1 bb2
+--------------
+
+-------------- bb1
+c = 5
+jmp bb3
+--------------
+
+-------------- bb2
+c = 3
+--------------
+
+-------------- bb3
+r = a + b
+r = r + c
+ret r
+--------------
+</code></pre></div></div>
+
+<p>Agora, para representar as arestas, vou só usar os nomes. E lembre-se que as arestas têm direção, que nesse caso é de cima para baixo.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    bb0
+    / \
+  bb1  bb2
+    \ /
+    bb3
+</code></pre></div></div>
+
+<p>Ahnn, isso ficou pior do que eu esperava, e eu certamente vou melhorar isso depois, mas espero que o exemplo tenha ficado claro sobre como que GFCs funcionam.</p>
+
+<h3 id="conclusão-parcial">Conclusão (Parcial)</h3>
+
+<p>Acho que eu cobri o básico (e talvez o essencial) de Código de Três Endereços e Grafo de Fluxo de Controle nessa postagem. E de verdade, eu espero que tenha dado para entender, porque esse assunto é muito importante para várias coisas que eu vou escrever aqui.</p>
+
+<p>Não sei com qual frequência que eu vou escrever postagens por aqui, então não crie expectativas de ver novas postagens, afinal o mestrado consome tempo, mas talvez nos veremos em breve. De qualquer forma, se quiser conversar comigo sobre o que eu escrevi aqui… bem, meu email tá no <a href="/ptbr/about">sobre</a>.</p>
+
+<h3 id="referências">Referências</h3>
+
+<p>Para escrever essa postagem, eu usei como material principal as <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/ementa/">aulas do meu orientador sobre Análise Estática de Programas</a>.</p>
+
+<p>Se você quiser mais materiais sobre o assunto, recomendo a página da <a href="https://homepages.dcc.ufmg.br/~fernando/classes/dcc888/biblio.html">bibliografia do mesmo curso</a>.</p>
+
+  </div><a class="u-url" href="/ptbr/compilers/2024/11/03/intermediate-representation.html" hidden></a>
+</article> -->
+
+    </div>
+
+  </body>
+
+</html>
