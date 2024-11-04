@@ -10,7 +10,7 @@ Olá, eu me chamo João Vitor Fröhlich esse é meu blog pessoal. Nele, eu vou t
 Sobre mim:
 
 - Graduado em ciência da computação pela Universidade do Estado de Santa Catarina (UDESC)
-- Mestrando em ciência da computação na Universidade Federal de Minas Gerais (UFMG), trabalhando no Laboratório de Compiladores ([LAC](https://lac-dcc.github.io/))
+- Mestrando em ciência da computação na Universidade Federal de Minas Gerais (UFMG), trabalhando no Laboratório de Compiladores ([LAC](https://lac-dcc.github.io/)) sob orientação do professor [Fernando Pereira](https://homepages.dcc.ufmg.br/~fernando/)
 - Programador competitivo aposentado:
     - 2 participações em finais brasileira da Maratona de Programação
     - 1 medalha de bronze na XXVII final brasileira

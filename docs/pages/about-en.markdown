@@ -11,7 +11,7 @@ About me:
 
 - Brazilian
 - Computer Science undergrad degree at Universidade do Estado de Santa Catarina (UDESC)
-- Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab ([LAC](https://lac-dcc.github.io/))
+- Computer Science MSc. student at Universidade Federal de Minas Gerais (UFMG), working in the Compilers Lab ([LAC](https://lac-dcc.github.io/)) under the supervision of [Fernando Pereira](https://homepages.dcc.ufmg.br/~fernando/)
 - Former competitive programmer:
     - Participated in 2 ICPC Brazilian Finals
     - Achieved bronze medal at XXVII ICPC Brazilian Finals
