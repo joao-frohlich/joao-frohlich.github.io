@@ -1,4 +1,379 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://joao-frohlich.github.io/ptbr/feed.xml" rel="self" type="application/atom+xml" /><link href="https://joao-frohlich.github.io/ptbr/" rel="alternate" type="text/html" /><updated>2024-11-03T22:10:35-03:00</updated><id>https://joao-frohlich.github.io/feed.xml</id><title type="html">{“en”=&amp;gt;”João Vitor Fröhlich”, “ptbr”=&amp;gt;”João Vitor Fröhlich”}</title><subtitle>{&quot;en&quot;=&gt;&quot;A personal blog about compilers and other interesting computer science stuff&quot;, &quot;ptbr&quot;=&gt;&quot;Um blog pessoal sobre compiladores e algumas outras coisas interessantes&quot;}</subtitle><entry xml:lang="ptbr"><title type="html">Introdução a Análise Estática de Programas - Representação Intermediária</title><link href="https://joao-frohlich.github.io/ptbr/compilers/2024/11/03/intermediate-representation.html" rel="alternate" type="text/html" title="Introdução a Análise Estática de Programas - Representação Intermediária" /><published>2024-11-03T18:12:00-03:00</published><updated>2024-11-03T18:12:00-03:00</updated><id>https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation</id><content type="html" xml:base="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"><![CDATA[<h3 id="introdução">Introdução</h3>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://joao-frohlich.github.io/ptbr/feed.xml" rel="self" type="application/atom+xml" /><link href="https://joao-frohlich.github.io/ptbr/" rel="alternate" type="text/html" /><updated>2025-08-09T13:31:08-03:00</updated><id>https://joao-frohlich.github.io/feed.xml</id><title type="html">{“en”=&amp;gt;”João Vitor Fröhlich”, “ptbr”=&amp;gt;”João Vitor Fröhlich”}</title><subtitle>{&quot;en&quot;=&gt;&quot;A personal blog about compilers and other interesting computer science stuff&quot;, &quot;ptbr&quot;=&gt;&quot;Um blog pessoal sobre compiladores e algumas outras coisas interessantes&quot;}</subtitle><entry xml:lang="ptbr"><title type="html">Escrevendo um Passe LLVM</title><link href="https://joao-frohlich.github.io/ptbr/llvm/2025/08/09/writing-llvm-pass.html" rel="alternate" type="text/html" title="Escrevendo um Passe LLVM" /><published>2025-08-09T13:00:00-03:00</published><updated>2025-08-09T13:00:00-03:00</updated><id>https://joao-frohlich.github.io/llvm/2025/08/09/writing-llvm-pass</id><content type="html" xml:base="https://joao-frohlich.github.io/llvm/2025/08/09/writing-llvm-pass.html"><![CDATA[<h3 id="introdução">Introdução</h3>
+
+<p>Após um certo tempo, hora de voltar a escrever alguma coisa aqui. Dessa vez, vou sair um pouco da teoria e ir para um lado prático (não que as próximas postagens daquele assunto não tenham um lado prático).</p>
+
+<p>Nessa postagem, irei explicar, ou tentar explicar, como construir um passe para a infraestrutura LLVM. Tá, eu sei, existem diversos tutoriais que ensinam a escrever, compilar e executar um passe LLVM, mas será que fará mal escrever mais um? Acho que excesso de opções não é de fato um problema aqui, além do mais, quando eu for falar sobre aplicações de passes LLVM mais pra frente, não terei que sair caçando algum blog em português que explique de uma forma que eu ache satisfatória, que as coisas funcionem e esse tipo de coisa. Note que essa postagem será inicialmente escrita só em português (a versão em inglês vai sair quando eu tiver paciência pra traduzir isso aqui). Além disso, eu gostaria muito de poder só indicar o <a href="https://llvm.org/docs/WritingAnLLVMNewPMPass.html">tutorial</a> da LLVM sobre o assunto mas, infelizmente, eu não achei a documentação da LLVM traduzida para português.</p>
+
+<p>Dessa forma, nessa postagem eu irei cobrir conteúdos bem básicos, assumindo que meus textos podem ser lidos por pessoas que não entendem quase nada de compiladores, porém têm um grande interesse na área. Porém, é esperado que a pessoa entenda um pouco de C++ para entender a parte da implementação.</p>
+
+<p>Por fim, um pequeno resumo do que será abordado:</p>
+
+<ul>
+  <li>A infraestrutura LLVM;</li>
+  <li>O que são passes LLVM;</li>
+  <li>Como escrever um passe;</li>
+  <li>Como compilar e executar um passe.</li>
+</ul>
+
+<h3 id="llvm">LLVM</h3>
+
+<p>A infraestrutura LLVM é um conjunto de ferramentas que permitem construir (e usar) diversos compiladores. Dentre as principais ferramentas, podemos destacar:</p>
+<ul>
+  <li>O núcleo da LLVM, que permite uma série de otimizações na etapa intermediária da compilação e a geração de código para a maioria das CPUs;</li>
+  <li>O compilador Clang, que é um compilador “nativo” da LLVM para C/C++; e</li>
+  <li>O projeto LLDB, que permite a debugação de código.</li>
+</ul>
+
+<p>Além disso, a LLVM também disponibiliza uma biblioteca padrão de C/C++ e uma representação intermediária de código, a LLVM IR. Quando se pensa no desenvolvimento de um compilador para uma linguagem  de programação qualquer utilizando a LLVM, normalmente o processo envolve transformar o código fonte em LLVM IR, e a partir daí apenas utilizar o conjunto de ferramentas da LLVM para gerar o código de máquina que será executado.</p>
+
+<h3 id="passes-llvm">Passes LLVM</h3>
+
+<p>A infraestrutura LLVM é altamente modular. Parte da utilização dessa modularidade é feita a partir dos passes LLVM. Esses passes constituem um conjunto de otimizações desenvolvidas para serem aplicadas nos programas compilados pela LLVM, a partir da ferramenta <code class="language-plaintext highlighter-rouge">opt</code>, que faz parte do arcabouço da LLVM.</p>
+
+<p>Um passe LLVM recebe um programa como entrada e percorre (daí o nome passe) todo o programa, podendo coletar informações acerca dele ou modificá-lo. Por conta disso, um passe pode ser dividido em 3 categorias:</p>
+
+<ul>
+  <li>Análise: passes que extraem informações de programas, de forma que essa informação possa ser utilizada por outros passes;</li>
+  <li>Transformação: passes que modificam o programa de alguma forma;</li>
+  <li>Utilidade: passes que fornecem alguma utilidade mas não se encaixam nem como passe de análise, nem como passe de transformação.</li>
+</ul>
+
+<p>Os passes podem operar sob diferentes níveis de hierarquia, porém normalmente trabalhamos com 2 tipos de hierarquias:</p>
+
+<ul>
+  <li>Módulos: representam partes de um programa e contêm funções, variáveis globais e metadados desta parte do programa;</li>
+  <li>Funções: representam as funções do programa, sendo que uma função contém uma assinatura (nome, parâmetros, tipo de retorno), blocos básicos (compostos por várias instruções), atributos e metadados.</li>
+</ul>
+
+<p>A partir disso, temos dois tipos de passes: passes de função (quando o passe percorre as funções do programa uma a uma) e passes de módulo (quando o passe percorre os módulos um a um).</p>
+
+<p>Por fim, a LLVM possui dois gerenciadores de passes diferentes: um legado (<em>Legacy Pass Manager</em>) e um novo (<em>New Pass Manager</em> ou NPM), mas não entrarei em detalhes sobre o gerenciador legado. Todas as minhas postagens em que eu falar sobre passes LLVM, incluindo essa, sempre estará se referindo ao NPM.</p>
+
+<h3 id="desenvolvendo-um-passe">Desenvolvendo um Passe</h3>
+
+<p>Além dos gerenciadores de passes, também existem duas formas diferentes de desenvolver os passes pra LLVM: “dentro da árvore” e “fora da árvore”.</p>
+
+<p>Confesso que nunca escrevi um passe “dentro da árvore”, mas a ideia é que você coloca o código do seu passe dentro da pasta da LLVM (por isso dentro da árvore) e, para compilar o passe, você recompila o <code class="language-plaintext highlighter-rouge">opt</code>.</p>
+
+<p>Então vamos nos contentar com a escrita de passes “fora da árvore”, porque é a forma que eu conheço (e, até onde eu vi, considero muito mais elegante). A questão aqui é que você pode desenvolver esse passe no diretório que você quiser, apenas tendo que escrever um pouco de código a mais (que praticamente não muda entre passes e, quando muda, muda pouco). A estrutura do passe vai ter uma organização de arquivos bem simples de ser utilizada:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>meu_passe/
+    |
+    +--include/
+    |   |
+    |   +--MeuPasse.h
+    |
+    +--lib/
+    |   |
+    |   +--MeuPasse.cpp
+    |   +--MeuPassePlugin.cpp
+    |
+    +--CMakeLists.txt
+</code></pre></div></div>
+
+<p>Note que, para escrever o passe, iremos utilizar o CMake como gerenciador de compilação do C++. Se você não sabe usar CMake, não tem problemas, porque vou mostrar só um jeito meio padrão de utilizar ele para compilar passes LLVM.</p>
+
+<p>Perceba como temos, nessa estrutura, um arquivo de cabeçalho (<code class="language-plaintext highlighter-rouge">MeuPasse.h</code>) e dois arquivos de implementação (<code class="language-plaintext highlighter-rouge">MeuPasse.cpp</code> e <code class="language-plaintext highlighter-rouge">MeuPassePlugin.cpp</code>). Isso acontece porque <code class="language-plaintext highlighter-rouge">MeuPassePlugin.cpp</code> é onde o passe fará seu registro no conjunto de passes da LLVM (evidentemente, seu passe ficará disponível apenas localmente).</p>
+
+<p>Pronto, agora temos uma organização de arquivos para começar a trabalhar, então vamos desenvolver um simples passe de análise: para cada função, vamos imprimir o nome dessa função e a quantidade de blocos básicos presentes nela. Note que, para isso, podemos desenvolver um passe de função, pois não precisamos observar a relação entre as funções e, portanto, podemos analisar cada função independentemente. Vou explicar detalhadamente como funciona o desenvolvimento de cada arquivo, começando pelo</p>
+
+<h4 id="meupasseh">MeuPasse.h</h4>
+
+<p>O código desse cabeçalho consiste na declaração de uma classe que define o passe. Isto porque cada passe na LLVM é representado por uma classe em C++.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef MEU_PASSE_H
+#define MEU_PASSE_H
+</span>
+<span class="cp">#include</span> <span class="cpf">"llvm/IR/PassManager.h"</span><span class="cp">
+</span>
+<span class="k">namespace</span> <span class="n">llvm</span> <span class="p">{</span>
+
+<span class="k">class</span> <span class="nc">MeuPasse</span> <span class="o">:</span> <span class="k">public</span> <span class="n">PassInfoMixin</span><span class="o">&lt;</span><span class="n">MeuPasse</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="n">PreservedAnalyses</span> <span class="n">run</span><span class="p">(</span><span class="n">Function</span> <span class="o">&amp;</span><span class="n">F</span><span class="p">,</span> <span class="n">FunctionAnalysisManager</span> <span class="o">&amp;</span><span class="n">FAM</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="p">}</span>
+
+<span class="cp">#endif // MEU_PASSE_H
+</span></code></pre></div></div>
+
+<p>Vamos comentar alguns detalhes mais a fundo.</p>
+
+<p>A classe <code class="language-plaintext highlighter-rouge">MeuPasse</code> herda da classe <code class="language-plaintext highlighter-rouge">PassInfoMixin</code>, que é uma classe <a href="https://en.cppreference.com/w/cpp/language/crtp.html">CRTP</a> (<em>Curiously Recurrent Template Pattern</em>) que configura automaticamente um conjunto de informações necessários para a LLVM entender o seu passe. Além disso, a classe declara uma função: <code class="language-plaintext highlighter-rouge">run</code>, que é responsável pela execução do passe (quase como se fosse o equivalente a uma função <code class="language-plaintext highlighter-rouge">main</code> de um programa qualquer). Essa função retorna o tipo <code class="language-plaintext highlighter-rouge">PreservedAnalyses</code>, que será explicada no arquivo de implementação da classe, e tem como parâmetros uma referência para <code class="language-plaintext highlighter-rouge">Function &amp;F</code> e uma referência para <code class="language-plaintext highlighter-rouge">FunctionAnalysisManager &amp;FAM</code>. O tipo <code class="language-plaintext highlighter-rouge">Function</code> representa uma função de um programa na LLVM IR e o tipo <code class="language-plaintext highlighter-rouge">FunctionAnalysisManager</code> é  uma classe que gerencia a execução de diversas análises para o tipo <code class="language-plaintext highlighter-rouge">Function</code>.</p>
+
+<p>Por fim, note que estamos declarando a função dentro do <code class="language-plaintext highlighter-rouge">namespace llvm</code>. Fazemos isso porque o passe precisa ser declarado como uma classe dentro deste namespace (portanto ficando algo como <code class="language-plaintext highlighter-rouge">llvm::MeuPasse</code> quando “visto de fora”). Agora, tendo explicado a declaração da classe, vamos ver a implementação da função <code class="language-plaintext highlighter-rouge">run</code>.</p>
+
+<h4 id="meupassecpp">MeuPasse.cpp</h4>
+
+<p>Vamos lembrar o que queremos fazer nesse passe. Para cada função, queremos imprimir:</p>
+<ul>
+  <li>O nome da função; e</li>
+  <li>A quantidade de blocos básicos dela.</li>
+</ul>
+
+<p>Para nossa sorte, todas essas informações podem ser facilmente acessadas e, dessa forma, o código se torna simples:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"MeuPasse.h"</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">llvm</span><span class="p">;</span>
+
+<span class="n">PreservedAnalyses</span> <span class="n">MeuPass</span><span class="o">::</span><span class="n">run</span><span class="p">(</span><span class="n">Function</span> <span class="o">&amp;</span><span class="n">F</span><span class="p">,</span>
+                                <span class="n">FunctionAnalysisManager</span> <span class="o">&amp;</span><span class="n">FAM</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">outs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">F</span><span class="p">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="n">F</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">PreservedAnalyses</span><span class="o">::</span><span class="n">all</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Nessa função, estamos utilizando a função <code class="language-plaintext highlighter-rouge">outs()</code> da LLVM, que é quase equivalente ao <code class="language-plaintext highlighter-rouge">cout</code> da biblioteca <code class="language-plaintext highlighter-rouge">iostream</code>, mas com alguns extras, como por exemplo uma definição para imprimir o tipo <code class="language-plaintext highlighter-rouge">StringRef</code> da llvm, que é o tipo de retorno da função <code class="language-plaintext highlighter-rouge">getName()</code>.</p>
+
+<p>A função <code class="language-plaintext highlighter-rouge">getName()</code> da classe <code class="language-plaintext highlighter-rouge">Function</code> retorna o nome da função, enquanto que a função <code class="language-plaintext highlighter-rouge">size()</code> retorna o número de blocos básicos da função.</p>
+
+<p>Por fim, note que retornamos <code class="language-plaintext highlighter-rouge">PreservedAnalyses::all()</code>, então vamos explicar o que é o tipo <code class="language-plaintext highlighter-rouge">PreservedAnalyses</code>. Esse tipo representa um conjunto de análises que são preservadas pelo nosso passe, e fornece implementações que garantem que as análises declaradas como preservadas são, de fato… preservadas. Nesse contexto, a função <code class="language-plaintext highlighter-rouge">all()</code> indica que nosso passe garante que <strong>todas</strong> as análises são preservadas. Num passe de análise, isso normalmente vai ser sempre verdade, porém quando lidarmos com passes de transformação, existe sim a possibilidade de algumas análises não serem preservadas.</p>
+
+<blockquote>
+  <p>Extra: para ir além do básico do básico, vou mostrar como iterar pelos blocos básicos da função para obter o número de instruções presentes na função:</p>
+  <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">num_instr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">BasicBlock</span> <span class="o">&amp;</span><span class="n">BB</span> <span class="o">:</span> <span class="n">F</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">num_instr</span> <span class="o">+=</span> <span class="n">BB</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">outs</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">num_instr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div>  </div>
+</blockquote>
+
+<h4 id="meupasseplugincpp">MeuPassePlugin.cpp</h4>
+
+<p>Agora, vamos “registrar” o passe que acabamos de implementar, afinal queremos ser capazes de executar ele. Para isso, vamos implementar um monte de código padrão que eu vou <em>tentar</em> explicar pra que serve cada coisa. Vamos começar com as importações:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"MeuPasse.h"</span><span class="cp">
+#include</span> <span class="cpf">"llvm/Passes/PassBuilder.h"</span><span class="cp">
+#include</span> <span class="cpf">"llvm/Passes/PassPlugin.h"</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">llvm</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Que não têm nada de especial. Agora, vamos para a função que registra o <em>pipeline</em> do passe:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">bool</span> <span class="nf">registerPipeline</span><span class="p">(</span><span class="n">StringRef</span> <span class="n">Name</span><span class="p">,</span> <span class="n">FunctionPassManager</span> <span class="o">&amp;</span><span class="n">FPM</span><span class="p">,</span>
+                      <span class="n">ArrayRef</span><span class="o">&lt;</span><span class="n">PassBuilder</span><span class="o">::</span><span class="n">PipelineElement</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">Name</span> <span class="o">==</span> <span class="s">"meu-passe"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">FPM</span><span class="p">.</span><span class="n">addPass</span><span class="p">(</span><span class="n">MeuPasse</span><span class="p">());</span>
+        <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Nessa função, estamos dizendo que, quando o <code class="language-plaintext highlighter-rouge">opt</code> for executado pedindo para executar o passe <code class="language-plaintext highlighter-rouge">meu-passe</code>, será registrado um pipeline composto pelo passe <code class="language-plaintext highlighter-rouge">MeuPasse()</code>. Note que <code class="language-plaintext highlighter-rouge">MeuPasse()</code> é a função construtora da classe <code class="language-plaintext highlighter-rouge">MeuPasse</code> que definimos anteriormente. Além disso, é possível adicionar novos passes no pipeline, como <code class="language-plaintext highlighter-rouge">LoopSimplifyPass()</code>, por exemplo. A ordem com que esses passes são adicionados importa, pois eles serão executados na ordem em que foram adicionados ao pipeline.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">PassPluginLibraryInfo</span> <span class="nf">getMeuPasse</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">LLVM_PLUGIN_API_VERSION</span><span class="p">,</span> <span class="s">"meu-passe"</span><span class="p">,</span>
+        <span class="n">LLVM_VERSION_STRING</span><span class="p">,</span> <span class="p">[](</span><span class="n">PassBuilder</span> <span class="o">&amp;</span><span class="n">PB</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">PB</span><span class="p">.</span><span class="n">registerPipelineParsingCallback</span><span class="p">(</span><span class="n">registerPipeline</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Aqui, estamos declarando uma função que diz como o passe deve ser carregado. O tipo <code class="language-plaintext highlighter-rouge">PassPluginLibraryInfo</code> é, nesse caso, uma struct que contém a versão da API da LLVM do plugin, o nome do passe, a versão da LLVM, e uma função que registra a pipeline do passe (nesse caso, a função que implementamos acima). Por fim, indicamos como inicializar o plugin (que diz como o passe será carregado) com:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">extern</span> <span class="s">"C"</span> <span class="n">LLVM_ATTRIBUTE_WEAK</span> <span class="n">PassPluginLibraryInfo</span>
+<span class="nf">llvmGetPassPluginInfo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">getMeuPasse</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Agora, vamos ver como compilar isso tudo.</p>
+
+<h4 id="cmakeliststxt">CMakeLists.txt</h4>
+
+<p>Vou supor que você já tenha o LLVM instalado e, mais especificamente, tenha compilado e instalado ele usando CMake.</p>
+
+<p>Caso não tenha (e esteja disposto a passar muito tempo vendo seu computador fritar) veja o <a href="#apêndice-a---compilando-a-llvm-usando-cmake">Apêndice A - Compilando a LLVM usando CMake</a>.</p>
+
+<p>Vamos começar o arquivo CMake com duas linhas obrigatórias, onde definimos a versão mínima do CMake necessária para compilar o projeto e o nome do projeto:</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cmake_minimum_required</span><span class="p">(</span>VERSION 3.20<span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span>MeuPasseLegal<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Agora vem um monte de código pra configurar a LLVM e configurar que queremos usar o C++17, que eu não vou explicar em detalhes:</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD 17 CACHE STRING <span class="s2">""</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span>LLVM_INSTALL_DIR <span class="s2">""</span> CACHE PATH <span class="s2">"LLVM installation directory"</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>LLVM_CMAKE_CONFIG_DIR <span class="s2">""</span> <span class="s2">"</span><span class="si">${</span><span class="nv">LLVM_INSTALL_DIR</span><span class="si">}</span><span class="s2">/lib/cmake/llvm/"</span><span class="p">)</span>
+<span class="nb">list</span><span class="p">(</span>APPEND CMAKE_PREFIX_PATH <span class="s2">"</span><span class="si">${</span><span class="nv">LLVM_CMAKE_CONFIG_DIR</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">find_package</span><span class="p">(</span>LLVM REQUIRED CONFIG<span class="p">)</span>
+
+<span class="nb">include_directories</span><span class="p">(</span><span class="si">${</span><span class="nv">LLVM_INCLUDE_DIRS</span><span class="si">}</span><span class="p">)</span>
+
+<span class="nb">if</span><span class="p">(</span>NOT LLVM_ENABLE_RTTI<span class="p">)</span>
+    <span class="nb">set</span><span class="p">(</span>CMAKE_CXX_FLAGS <span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_CXX_FLAGS</span><span class="si">}</span><span class="s2"> -fno-rtti"</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+
+<span class="nb">set</span><span class="p">(</span>CMAKE_LIBRARY_OUTPUT_DIRECTORY <span class="s2">"</span><span class="si">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="si">}</span><span class="s2">/lib"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Depois, vamos mostrar como compilar nosso código. Primeiro, definimos uma biblioteca de nome <code class="language-plaintext highlighter-rouge">MeuPasse</code> do tipo <code class="language-plaintext highlighter-rouge">MODULE</code>, com as implementações do passe:</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_library</span><span class="p">(</span>MeuPasse MODULE
+    lib/MeuPasse.cpp
+    lib/MeuPassePlugin.cpp<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Por fim, dizemos onde essa biblioteca <code class="language-plaintext highlighter-rouge">MeuPasse</code> deve buscar os arquivos de cabeçalho:</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">target_include_directories</span><span class="p">(</span>MeuPasse PRIVATE
+    <span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span><span class="s2">/include"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Dessa forma, permitimos que o arquivo <code class="language-plaintext highlighter-rouge">MeuPasse.cpp</code> enxergue o cabeçalho <code class="language-plaintext highlighter-rouge">MeuPasse.h</code> sem precisar descrever o caminho exato para ele (que, relativo a <code class="language-plaintext highlighter-rouge">MeuPasse.cpp</code>, seria <code class="language-plaintext highlighter-rouge">../include/MeuPasse.h</code>). Lembre que, quando incluímos este cabeçalho neste arquivo, o fizemos apenas com <code class="language-plaintext highlighter-rouge">#include "MeuPasse.h"</code>.</p>
+
+<p>Pronto, agora nós temos um passe implementado, com instruções de como registrar ele no pipeline de passes da LLVM, e um arquivo CMake configurado para compilar o passe. Agora, vamos testar se isso tudo funciona.</p>
+
+<h3 id="testando-um-passe">Testando um Passe</h3>
+
+<p>Vamos começar pelo mais importante, que é compilar o passe. Para isso, vamos utilizar o CMake e compilar o passe numa pasta <code class="language-plaintext highlighter-rouge">build</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>build
+<span class="nb">cd </span>build
+cmake ..
+</code></pre></div></div>
+
+<p>Com isso, o CMake irá gerar os arquivos de compilação. Agora, vamos compilar executando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make
+</code></pre></div></div>
+
+<p>Se tudo der certo (e você não tiver mexido na variável <code class="language-plaintext highlighter-rouge">CMAKE_LIBRARY_OUTPUT_DIRECTORY</code>, o seu passe compilado estará no arquivo <code class="language-plaintext highlighter-rouge">lib/libMeuPasse.so</code> dentro da pasta <code class="language-plaintext highlighter-rouge">build</code>).</p>
+
+<p>Agora queremos executar, certo? Bom, primeiro, precisamos de um código para isso. Lembre que fizemos um passe para analisar <strong>códigos</strong>. Vamos usar o código a seguir (que vou nomeá-lo preguiçosamente de <code class="language-plaintext highlighter-rouge">a.c</code>), com uma função recursiva pra calcular o n-ésimo termo da sequência de Fibonacci recursivamente:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">f</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">return</span> <span class="n">x</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Vamos compilar este código para LLVM IR usando o clang com os seguintes parâmetros:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clang a.c <span class="nt">-Xclang</span> <span class="nt">-disable-O0-optnone</span> <span class="nt">-S</span> <span class="nt">-emit-llvm</span> <span class="nt">-o</span> a.ll
+</code></pre></div></div>
+
+<p>Os parâmetros <code class="language-plaintext highlighter-rouge">-Xclang -disable-O0-optnone</code> vão impedir que a LLVM marque as funções deste código como não otimizáveis, o que impediria nosso passe de executar nelas. Já os parâmetros <code class="language-plaintext highlighter-rouge">-S -emit-llvm</code> fazem com que o clang gere o código em LLVM IR. O código gerado deve ficar algo como:</p>
+
+<div class="language-llvm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="k">define</span> <span class="k">dso_local</span> <span class="kt">i32</span> <span class="vg">@f</span><span class="p">(</span><span class="kt">i32</span> <span class="err">noundef</span> <span class="nv">%0</span><span class="p">)</span> <span class="vg">#0</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">br</span> <span class="kt">i1</span> <span class="nv">%5</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%6</span><span class="p">,</span> <span class="kt">label</span> <span class="nv">%8</span>
+
+<span class="m">6</span><span class="err">:</span>  <span class="c1">; preds = %1</span>
+  <span class="p">...</span>
+  <span class="k">br</span> <span class="kt">label</span> <span class="nv">%16</span>
+
+<span class="m">8</span><span class="err">:</span>  <span class="c1">; preds = %1</span>
+  <span class="p">...</span>
+  <span class="k">br</span> <span class="kt">label</span> <span class="nv">%16</span>
+
+<span class="m">16</span><span class="err">:</span> <span class="c1">; preds = %8, %6</span>
+  <span class="nv">%17</span> <span class="p">=</span> <span class="k">load</span> <span class="kt">i32</span><span class="p">,</span> <span class="err">ptr</span> <span class="nv">%2</span><span class="p">,</span> <span class="k">align</span> <span class="m">4</span>
+  <span class="k">ret</span> <span class="kt">i32</span> <span class="nv">%17</span>
+<span class="p">}</span>
+
+<span class="k">define</span> <span class="k">dso_local</span> <span class="kt">i32</span> <span class="vg">@main</span><span class="p">()</span> <span class="vg">#0</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">ret</span> <span class="kt">i32</span> <span class="m">0</span>
+<span class="p">}</span>
+
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p>Perceba que a função <code class="language-plaintext highlighter-rouge">f</code> possui 4 blocos básicos (0, que é omitido, 6, 8 e 16) e a função <code class="language-plaintext highlighter-rouge">main</code> possui apenas 1 bloco básico (0, que é omitido). Agora, vamos executar nosso passe com o seguinte comando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>opt <span class="nt">-disable-output</span> <span class="nt">-load-pass-plugin</span> lib/libMeuPasse.so <span class="nt">-passes</span><span class="o">=</span><span class="s2">"meu-passe"</span> a.ll
+</code></pre></div></div>
+
+<p>Perceba que, como nosso passe não está incluso no conjunto de passes presentes na árvore da LLVM, precisamos carregar o arquivo compilado do nosso passe com <code class="language-plaintext highlighter-rouge">-load-pass-plugin ...</code>.</p>
+
+<p>Ao executar, a saída esperada é:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>f 4
+main 1
+</code></pre></div></div>
+
+<h3 id="conclusão">Conclusão</h3>
+
+<p>Enfim, temos um passe da LLVM. Note que esse é um passe de análise muito simples, que não nos diz quase nada. De todo modo, a ideia era tentar explicar o conceito dos passes e como desenvolver um. Na próxima postagem sobre construção de passes LLVM, vou tentar explicar como fazer um passe de transformação de código que faz algo um pouco mais útil (spoiler: vamos contar quantas vezes cada aresta do CFG é atravessada). Caso tenha dúvidas e queira conversar sobre o assunto, lembre que meu email está no <a href="/ptbr/about">sobre</a>. Até (espero) breve.</p>
+
+<h3 id="referências">Referências</h3>
+
+<ul>
+  <li>https://llvm.org/</li>
+  <li>https://llvm.org/doxygen/</li>
+</ul>
+
+<h3 id="apêndice-a---compilando-a-llvm-usando-cmake">Apêndice A - Compilando a LLVM usando CMake</h3>
+
+<p>Aqui eu vou mostrar como baixar, configurar, compilar e instalar a LLVM usando CMake no Linux. Não faço ideia de como isso funciona no Windows ou no Mac (apesar que esse é Unix-based pelo menos).</p>
+
+<p>Além disso, estarei mostrando aqui como instalar a LLVM 18.1.8, que é meio antiga (a versão mais atualizada, que não está em pre-release, é a 20.1.8), mas é a versão que eu uso no mestrado.</p>
+
+<p>Começamos baixando o código fonte da LLVM com</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/llvm/llvm-project/ <span class="nt">--depth</span> 1 <span class="nt">--branch</span><span class="o">=</span>release/18.x
+</code></pre></div></div>
+
+<p>Recomendo utilizar <code class="language-plaintext highlighter-rouge">--depth 1</code> se você não pretende navegar nas diferentes branches e releases da LLVM.</p>
+
+<p>Agora, dentro da pasta <code class="language-plaintext highlighter-rouge">llvm-project</code>, configuramos o projeto com (assumo que você possua <code class="language-plaintext highlighter-rouge">gcc</code> e <code class="language-plaintext highlighter-rouge">g++</code> instalados, e esteja numa arquitetura X86):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>build
+<span class="nb">cd </span>build
+cmake <span class="nt">-G</span> <span class="s2">"Unix Makefiles"</span> ../llvm <span class="se">\\</span>
+    <span class="nt">-DLLVM_TARGETS_TO_BUILD</span><span class="o">=</span>X86 <span class="nt">-DCMAKE_BUILD_TYPE</span><span class="o">=</span>Release <span class="se">\\</span>
+    <span class="nt">-DCMAKE_C_COMPILER</span><span class="o">=</span>gcc <span class="nt">-DCMAKE_CXX_COMPILER</span><span class="o">=</span>g++ <span class="se">\\</span>
+    <span class="nt">-DCMAKE_ASM_COMPILER</span><span class="o">=</span>gcc <span class="se">\\</span>
+    <span class="nt">-DLLVM_ENABLE_PROJECTS</span><span class="o">=</span><span class="s2">"clang;lld"</span> <span class="se">\\</span>
+    <span class="nt">-DCMAKE_INSTALL_PREFIX</span><span class="o">=</span>/usr/local
+</code></pre></div></div>
+
+<p>Opcional: se você tiver o sistema de compilação <a href="https://ninja-build.org/">Ninja</a> (recomendo muito), você pode configurar pra compilar a LLVM usando ele com <code class="language-plaintext highlighter-rouge">-G Ninja</code>.</p>
+
+<p>Com isso, o CMake irá configurar os arquivos de compilação. Agora, você pode compilar isso tudo usando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make <span class="nt">-jn</span>
+</code></pre></div></div>
+
+<p>Aqui, troque <code class="language-plaintext highlighter-rouge">n</code> pela quantidade de núcleos da CPU que você quer usar. Se você estiver usando Ninja, você pode executar apenas <code class="language-plaintext highlighter-rouge">ninja</code> que ele irá compilar pra você usando todos os núcleos do seu processador (caso você esteja vendo sua memória RAM sumir, vale a dica do <code class="language-plaintext highlighter-rouge">-jn</code> também pra limitar a quantidade de núcleos compilando).</p>
+
+<blockquote>
+  <p>Pode acontecer da compilação falhar. Minha recomendação é mandar compilar de novo quantas vezes forem necessárias. Já teve caso em que eu mandei compilar a LLVM com algo como:</p>
+  <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for </span>i <span class="k">in </span>0..100<span class="p">;</span> <span class="k">do </span>ninja<span class="p">;</span> <span class="k">done</span>
+</code></pre></div>  </div>
+  <p>E não ironicamente isso funcionou, com ele terminando de compilar na tentativa 50 e alguma coisa. Isso acontece porque, como está sendo compilado em paralelo (e o projeto não é tão bem configurado), ele tenta compilar alguma biblioteca que depende de outra biblioteca que ainda está sendo compilada, aí obviamente dá erro.</p>
+</blockquote>
+
+<p>Quando terminar de compilar (e vai demorar muito tempo, vai por mim), você pode instalar com</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>Ou <code class="language-plaintext highlighter-rouge">sudo ninja install</code>. Com a configuração do <code class="language-plaintext highlighter-rouge">DCMAKE_INSTALL_PREFIX=/usr/local</code>, esse comando irá inserir os binários em <code class="language-plaintext highlighter-rouge">/usr/local/bin</code>, os cabeçalhos das classes em <code class="language-plaintext highlighter-rouge">/usr/local/include</code> e as implementações das classes em <code class="language-plaintext highlighter-rouge">/usr/local/lib</code>.</p>
+
+<p>Se quiser ver se deu tudo certo, basta rodar <code class="language-plaintext highlighter-rouge">clang --version</code> e ver se ele imprime algo como:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clang version 18.1.8 ...
+...
+</code></pre></div></div>]]></content><author><name></name></author><category term="LLVM" /><summary type="html"><![CDATA[Introdução]]></summary></entry><entry xml:lang="ptbr"><title type="html">Introdução a Análise Estática de Programas - Representação Intermediária</title><link href="https://joao-frohlich.github.io/ptbr/compilers/2024/11/03/intermediate-representation.html" rel="alternate" type="text/html" title="Introdução a Análise Estática de Programas - Representação Intermediária" /><published>2024-11-03T18:12:00-03:00</published><updated>2024-11-03T18:12:00-03:00</updated><id>https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation</id><content type="html" xml:base="https://joao-frohlich.github.io/compilers/2024/11/03/intermediate-representation.html"><![CDATA[<h3 id="introdução">Introdução</h3>
 
 <p>Bem, hora de escrever algum conteúdo de fato nesse site.</p>
 
