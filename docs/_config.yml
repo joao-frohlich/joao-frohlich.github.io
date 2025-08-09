@@ -45,8 +45,8 @@ header_pages:
     - pages/categories-ptbr.markdown
 
 category_list:
-  en: ["About", "Compilers"]
-  ptbr: ["Sobre", "Compiladores"]
+  en: ["About", "Compilers", "LLVM"]
+  ptbr: ["Sobre", "Compiladores", "LLVM"]
 
 # category_list_en: ["about", "compilers"]
 # category_list_ptbr: ["sobre", "compiladores"]

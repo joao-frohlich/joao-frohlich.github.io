@@ -13,7 +13,7 @@ else
 	echo "Check 1 OK - running in the right directory"
 fi
 
-if ! git status | grep -q "On branch $SOURCES_BRANCH"
+if ! git status | grep -q -E "(No ramo|On branch) $SOURCES_BRANCH"
 then
 	echo "Check 2 Error: You need to be in the $SOURCES_BRANCH branch of your repository"
 	exit 1
@@ -37,7 +37,7 @@ bundle exec jekyll build
 
 cd _site
 
-if ! git status | grep -q "On branch $SITE_BRANCH"
+if ! git status | grep -q -E "(No Ramo|On branch) $SITE_BRANCH"
 then
 	echo "Check 3 Error: You need to be in the $SITE_BRANCH branch of your repository - exiting - no site checked in"
 	exit 1
